@@ -1,0 +1,17 @@
+{
+	"name": "App_3",
+	"properties": {
+		"activities": [
+			{
+				"name": "WaitApp_3",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			}
+		],
+		"annotations": []
+	}
+}
