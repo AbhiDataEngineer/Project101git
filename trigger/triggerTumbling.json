@@ -16,7 +16,7 @@
 			"startTime": "2021-03-13T07:39:00Z",
 			"endTime": "2021-03-14T07:46:00Z",
 			"delay": "00:00:00",
-			"maxConcurrency": 2,
+			"maxConcurrency": 10,
 			"retryPolicy": {
 				"intervalInSeconds": 30
 			},
