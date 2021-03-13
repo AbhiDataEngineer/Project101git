@@ -305,13 +305,6 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {}
-					},
-					{
-						"pipelineReference": {
-							"referenceName": "Demo Trigger",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
 					}
 				],
 				"type": "ScheduleTrigger",
@@ -326,8 +319,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/copydata')]",
-				"[concat(variables('factoryId'), '/pipelines/Demo Trigger')]"
+				"[concat(variables('factoryId'), '/pipelines/copydata')]"
 			]
 		},
 		{
