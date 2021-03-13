@@ -4,7 +4,7 @@
 		"annotations": [
 			"abhishek"
 		],
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
