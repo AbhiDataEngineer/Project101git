@@ -10,15 +10,6 @@
 		},
 		"LS_AzureKeyVault_Dev_properties_typeProperties_baseUrl": {
 			"value": "https://project101-dev-kv101.vault.azure.net/"
-		},
-		"trigger1evnt_properties_typeProperties_scope": {
-			"value": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa"
-		},
-		"event_trigger_properties_copydata_parameters_FileName": {
-			"value": "@triggerBody().fileName"
-		},
-		"event_trigger_properties_typeProperties_scope": {
-			"value": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa"
 		}
 	}
 }
