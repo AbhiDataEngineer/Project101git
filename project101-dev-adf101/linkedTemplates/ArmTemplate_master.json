@@ -19,6 +19,14 @@
 			"type": "string",
 			"defaultValue": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa"
 		},
+		"event_trigger_properties_copydata_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"event_trigger_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -49,11 +57,17 @@
 					"LS_AzureKeyVault_Dev_properties_typeProperties_baseUrl": {
 						"value": "[parameters('LS_AzureKeyVault_Dev_properties_typeProperties_baseUrl')]"
 					},
+					"trigger1evnt_properties_typeProperties_scope": {
+						"value": "[parameters('trigger1evnt_properties_typeProperties_scope')]"
+					},
 					"LS_AzureBlobStorage_Dev_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('LS_AzureBlobStorage_Dev_properties_typeProperties_connectionString_secretName')]"
 					},
-					"trigger1evnt_properties_typeProperties_scope": {
-						"value": "[parameters('trigger1evnt_properties_typeProperties_scope')]"
+					"event_trigger_properties_copydata_parameters_FileName": {
+						"value": "[parameters('event_trigger_properties_copydata_parameters_FileName')]"
+					},
+					"event_trigger_properties_typeProperties_scope": {
+						"value": "[parameters('event_trigger_properties_typeProperties_scope')]"
 					}
 				}
 			},

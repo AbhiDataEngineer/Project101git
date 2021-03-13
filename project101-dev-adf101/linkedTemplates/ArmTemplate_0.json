@@ -11,11 +11,19 @@
 			"type": "string",
 			"defaultValue": "https://project101-dev-kv101.vault.azure.net/"
 		},
+		"trigger1evnt_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa"
+		},
 		"LS_AzureBlobStorage_Dev_properties_typeProperties_connectionString_secretName": {
 			"type": "string",
 			"defaultValue": "Dev-SA-Access-Secret"
 		},
-		"trigger1evnt_properties_typeProperties_scope": {
+		"event_trigger_properties_copydata_parameters_FileName": {
+			"type": "string",
+			"defaultValue": "@triggerBody().fileName"
+		},
+		"event_trigger_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa"
 		}
@@ -37,6 +45,26 @@
 						"userProperties": [],
 						"typeProperties": {
 							"waitTimeInSeconds": 9
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EventTrigger')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Wait1",
+						"type": "Wait",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
 						}
 					}
 				],
@@ -78,22 +106,23 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/EventTrigger')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
+			"name": "[concat(parameters('factoryName'), '/trigger1evnt')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"activities": [
-					{
-						"name": "Wait1",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 1
-						}
-					}
-				],
-				"annotations": []
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/input/blobs/Final",
+					"blobPathEndsWith": ".csv",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('trigger1evnt_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
 			},
 			"dependsOn": []
 		},
@@ -125,7 +154,7 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipeline": {
 					"pipelineReference": {
 						"referenceName": "TumblingWindowDemo",
@@ -160,12 +189,20 @@
 					"referenceName": "LS_AzureBlobStorage_Dev",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": "data.csv",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
 						"container": "output"
 					},
 					"columnDelimiter": ",",
@@ -188,12 +225,20 @@
 					"referenceName": "LS_AzureBlobStorage_Dev",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
 				"annotations": [],
 				"type": "DelimitedText",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": "Final_SLS_Data.csv",
+						"fileName": {
+							"value": "@dataset().FileName",
+							"type": "Expression"
+						},
 						"container": "input"
 					},
 					"columnDelimiter": ",",
@@ -318,14 +363,24 @@
 							{
 								"referenceName": "dsi_nput",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"FileName": {
+										"value": "@pipeline().parameters.FileName",
+										"type": "Expression"
+									}
+								}
 							}
 						],
 						"outputs": [
 							{
 								"referenceName": "ds_output",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"FileName": {
+										"value": "@pipeline().parameters.FileName",
+										"type": "Expression"
+									}
+								}
 							}
 						]
 					},
@@ -345,7 +400,12 @@
 							"dataset": {
 								"referenceName": "dsi_nput",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"FileName": {
+										"value": "@pipeline().parameters.FileName",
+										"type": "Expression"
+									}
+								}
 							},
 							"timeout": "7.00:00:00",
 							"sleep": 10
@@ -377,135 +437,11 @@
 						}
 					}
 				],
-				"annotations": [],
-				"lastPublishTime": "2021-03-11T19:23:34Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/dsi_nput')]",
-				"[concat(variables('factoryId'), '/datasets/ds_output')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/copydata_event')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "copy data from input to output",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "Check Input File",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "dsi_nput",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "ds_output",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					},
-					{
-						"name": "Check Input File",
-						"type": "Validation",
-						"dependsOn": [
-							{
-								"activity": "Wait 15 Seconds",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"dataset": {
-								"referenceName": "dsi_nput",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"timeout": "7.00:00:00",
-							"sleep": 10
-						}
-					},
-					{
-						"name": "Wait 15 Seconds",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 15
-						}
-					},
-					{
-						"name": "Wait1",
-						"type": "Wait",
-						"dependsOn": [
-							{
-								"activity": "copy data from input to output",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 1
-						}
+				"parameters": {
+					"FileName": {
+						"type": "string"
 					}
-				],
+				},
 				"annotations": [],
 				"lastPublishTime": "2021-03-11T19:23:34Z"
 			},
@@ -522,7 +458,7 @@
 				"annotations": [
 					"abhishek"
 				],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -548,7 +484,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/trigger1evnt')]",
+			"name": "[concat(parameters('factoryName'), '/event_trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -557,25 +493,27 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "copydata_event",
+							"referenceName": "copydata",
 							"type": "PipelineReference"
 						},
-						"parameters": {}
+						"parameters": {
+							"FileName": "[parameters('event_trigger_properties_copydata_parameters_FileName')]"
+						}
 					}
 				],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/input/blobs/Final",
+					"blobPathBeginsWith": "/input/blobs/SLS_disconted",
 					"blobPathEndsWith": ".csv",
 					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('trigger1evnt_properties_typeProperties_scope')]",
+					"scope": "[parameters('event_trigger_properties_typeProperties_scope')]",
 					"events": [
 						"Microsoft.Storage.BlobCreated"
 					]
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/copydata_event')]"
+				"[concat(variables('factoryId'), '/pipelines/copydata')]"
 			]
 		}
 	]

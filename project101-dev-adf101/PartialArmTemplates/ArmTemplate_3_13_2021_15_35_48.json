@@ -6,92 +6,12 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "project101-dev-adf101"
-		},
-		"LS_AzureBlobStorage_Dev_properties_typeProperties_connectionString_secretName": {
-			"type": "string",
-			"defaultValue": "Dev-SA-Access-Secret"
-		},
-		"LS_AzureKeyVault_Dev_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://project101-dev-kv101.vault.azure.net/"
-		},
-		"trigger1evnt_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa"
-		},
-		"event_trigger_properties_copydata_parameters_FileName": {
-			"type": "string",
-			"defaultValue": "@triggerBody().fileName"
-		},
-		"event_trigger_properties_typeProperties_scope": {
-			"type": "string",
-			"defaultValue": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('factoryName'), '/Demo Trigger')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Wait10",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 9
-						}
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/EventTrigger')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Wait1",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 1
-						}
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/TumblingWindowDemo')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Wait10",
-						"type": "Wait",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"waitTimeInSeconds": 10
-						}
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('factoryName'), '/copydata')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -273,9 +193,7 @@
 				},
 				"schema": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_AzureBlobStorage_Dev')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/dsi_nput')]",
@@ -358,43 +276,6 @@
 					}
 				]
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_AzureBlobStorage_Dev')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_AzureBlobStorage_Dev')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "LS_AzureKeyVault_Dev",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "[parameters('LS_AzureBlobStorage_Dev_properties_typeProperties_connectionString_secretName')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_AzureKeyVault_Dev')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_AzureKeyVault_Dev')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('LS_AzureKeyVault_Dev_properties_typeProperties_baseUrl')]"
-				}
-			},
 			"dependsOn": []
 		},
 		{
@@ -410,7 +291,7 @@
 					"blobPathBeginsWith": "/input/blobs/Final",
 					"blobPathEndsWith": ".csv",
 					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('trigger1evnt_properties_typeProperties_scope')]",
+					"scope": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa",
 					"events": [
 						"Microsoft.Storage.BlobCreated"
 					]
@@ -429,8 +310,7 @@
 					"pipelineReference": {
 						"referenceName": "TumblingWindowDemo",
 						"type": "PipelineReference"
-					},
-					"parameters": {}
+					}
 				},
 				"type": "TumblingWindowTrigger",
 				"typeProperties": {
@@ -446,9 +326,7 @@
 					"dependsOn": []
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/TumblingWindowDemo')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/triggerdemo')]",
@@ -464,8 +342,7 @@
 						"pipelineReference": {
 							"referenceName": "copydata",
 							"type": "PipelineReference"
-						},
-						"parameters": {}
+						}
 					}
 				],
 				"type": "ScheduleTrigger",
@@ -497,7 +374,7 @@
 							"type": "PipelineReference"
 						},
 						"parameters": {
-							"FileName": "[parameters('event_trigger_properties_copydata_parameters_FileName')]"
+							"FileName": "@triggerBody().fileName"
 						}
 					}
 				],
@@ -506,7 +383,7 @@
 					"blobPathBeginsWith": "/input/blobs/SLS_disconted",
 					"blobPathEndsWith": ".csv",
 					"ignoreEmptyBlobs": true,
-					"scope": "[parameters('event_trigger_properties_typeProperties_scope')]",
+					"scope": "/subscriptions/96a67257-0c9c-4fc1-ab5d-f909fd7c9c72/resourceGroups/Project101-Dev-RG/providers/Microsoft.Storage/storageAccounts/project101devsa",
 					"events": [
 						"Microsoft.Storage.BlobCreated"
 					]
